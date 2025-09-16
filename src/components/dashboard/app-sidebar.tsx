@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/avatar';
 import { Mountain, LayoutDashboard, Rss, BarChart3, Settings, AlertCircle } from 'lucide-react';
 import { usePathname } from 'next/navigation';
+import Link from 'next/link';
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -30,9 +31,11 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton href="/dashboard" isActive={pathname === '/dashboard'}>
-              <LayoutDashboard />
-              Dashboard
+            <SidebarMenuButton href="/dashboard" asChild isActive={pathname === '/dashboard'}>
+              <Link href="/dashboard">
+                <LayoutDashboard />
+                Dashboard
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
@@ -42,9 +45,11 @@ export function AppSidebar() {
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton href="/dashboard/sensors" isActive={pathname === '/dashboard/sensors'}>
-              <Rss />
-              Sensors
+             <SidebarMenuButton href="/dashboard/sensors" asChild isActive={pathname === '/dashboard/sensors'}>
+              <Link href="/dashboard/sensors">
+                <Rss />
+                Sensors
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
