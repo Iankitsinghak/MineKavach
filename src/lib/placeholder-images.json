@@ -3,9 +3,9 @@
   "placeholderImages": [
     {
       "id": "risk-map",
-      "description": "A topographic map of a mine with colored overlays indicating risk levels.",
-      "imageUrl": "https://picsum.photos/seed/riskmap/1200/800",
-      "imageHint": "topographic map"
+      "description": "A color-based heatmap of a mine, indicating different levels of risk in various zones.",
+      "imageUrl": "https://picsum.photos/seed/heatmap/1200/800",
+      "imageHint": "heatmap mine"
     }
   ]
 }
