@@ -57,12 +57,27 @@ export const mockDataSources: DataSource[] = [
     status: 'Online',
   },
   {
-    name: 'Geotechnical Sensors',
+    name: 'Displacement Sensor 1',
+    type: 'Sensor',
+    status: 'Online',
+  },
+  {
+    name: 'Strain Gauge A',
+    type: 'Sensor',
+    status: 'Online',
+  },
+  {
+    name: 'Pore Pressure Sensor 3B',
     type: 'Sensor',
     status: 'Error',
   },
   {
-    name: 'Environmental Monitor',
+    name: 'Rainfall Gauge',
+    type: 'Environmental',
+    status: 'Online',
+  },
+  {
+    name: 'Temperature Sensor',
     type: 'Environmental',
     status: 'Offline',
   },
