@@ -14,9 +14,11 @@ import {
   AvatarFallback,
   AvatarImage,
 } from '@/components/ui/avatar';
-import { Mountain, LayoutDashboard, Bell, BarChart3, Settings, AlertCircle } from 'lucide-react';
+import { Mountain, LayoutDashboard, Rss, BarChart3, Settings, AlertCircle } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 
 export function AppSidebar() {
+  const pathname = usePathname();
   return (
     <Sidebar>
       <SidebarHeader>
@@ -28,7 +30,7 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton href="#" isActive>
+            <SidebarMenuButton href="/dashboard" isActive={pathname === '/dashboard'}>
               <LayoutDashboard />
               Dashboard
             </SidebarMenuButton>
@@ -37,6 +39,12 @@ export function AppSidebar() {
             <SidebarMenuButton href="#">
               <AlertCircle />
               Alerts
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton href="/dashboard/sensors" isActive={pathname === '/dashboard/sensors'}>
+              <Rss />
+              Sensors
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
