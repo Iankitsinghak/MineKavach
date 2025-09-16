@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { mockDataSources } from '@/lib/data';
 import { cn } from '@/lib/utils';
 import { Bot, HardDrive, Rss, Cloud } from 'lucide-react';
@@ -22,6 +22,7 @@ export function DataSources() {
     <Card>
       <CardHeader>
         <CardTitle>Data Sources</CardTitle>
+        <CardDescription>Status of all data collection points.</CardDescription>
       </CardHeader>
       <CardContent>
         <ul className="space-y-4">

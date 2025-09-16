@@ -1,14 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DataSources } from '@/components/dashboard/data-sources';
 
 export default function SensorsPage() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Sensors</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p>This is the sensors page.</p>
-      </CardContent>
-    </Card>
-  );
+  return <DataSources />;
 }
