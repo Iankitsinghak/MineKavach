@@ -53,9 +53,11 @@ export function AppSidebar() {
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton href="#">
-              <BarChart3 />
-              Reports
+            <SidebarMenuButton href="/dashboard/reports" asChild isActive={pathname === '/dashboard/reports'}>
+              <Link href="/dashboard/reports">
+                <BarChart3 />
+                Reports
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
