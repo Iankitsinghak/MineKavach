@@ -8,7 +8,7 @@
  * - WeatherOutput - The output schema for the getWeather tool.
  */
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit/zod';
+import { z } from 'zod';
 
 export const WeatherInputSchema = z.object({
     latitude: z.number().describe('The latitude for the weather report.'),

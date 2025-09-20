@@ -9,7 +9,7 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import {z} from 'zod';
 
 const GenerateActionPlansInputSchema = z.object({
   rockfallProbability: z.number().describe('The probability of a rockfall event (0-1).'),

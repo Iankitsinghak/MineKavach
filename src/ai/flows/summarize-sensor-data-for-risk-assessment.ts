@@ -10,7 +10,7 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import {z} from 'zod';
 
 const SummarizeSensorDataForRiskAssessmentInputSchema = z.object({
   sensorData: z.string().describe('Geotechnical sensor data (displacement, strain, pore pressure).'),
