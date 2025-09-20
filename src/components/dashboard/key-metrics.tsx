@@ -41,7 +41,7 @@ export function KeyMetrics() {
         const weatherReport = await getWeather({ latitude: lat, longitude: lon });
         setWeather({
           value: `${weatherReport.temperature.toFixed(1)}°C, ${weatherReport.condition}`,
-          subtext: `Wind: ${weatherReport.windSpeed} km/h`,
+          subtext: `Wind: ${weatherReport.windSpeed.toFixed(0)} km/h, Humidity: ${weatherReport.humidity.toFixed(0)}%`,
         });
       } catch (error) {
         console.error('Failed to fetch weather:', error);
@@ -97,4 +97,3 @@ export function KeyMetrics() {
     </div>
   );
 }
-

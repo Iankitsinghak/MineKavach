@@ -3,20 +3,20 @@
 /**
  * @fileOverview A tool for fetching weather information.
  * 
- * - getWeather - A tool that returns the current weather for a given location.
- * - WeatherInput - The input schema for the getWeather tool.
+ * - getWeather - A function that returns the current weather for a given location.
+ * - WeatherInput - The input type for the getWeather tool.
  * - WeatherOutput - The output schema for the getWeather tool.
  */
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
-export const WeatherInputSchema = z.object({
+const WeatherInputSchema = z.object({
     latitude: z.number().describe('The latitude for the weather report.'),
     longitude: z.number().describe('The longitude for the weather report.'),
 });
 export type WeatherInput = z.infer<typeof WeatherInputSchema>;
 
-export const WeatherOutputSchema = z.object({
+const WeatherOutputSchema = z.object({
     temperature: z.number().describe('The current temperature in Celsius.'),
     condition: z.string().describe('A brief description of the weather condition (e.g., "Sunny", "Cloudy", "Rainy").'),
     windSpeed: z.number().describe('The current wind speed in km/h.'),
@@ -24,9 +24,9 @@ export const WeatherOutputSchema = z.object({
 });
 export type WeatherOutput = z.infer<typeof WeatherOutputSchema>;
 
-export const getWeather = ai.defineTool(
+const getWeatherTool = ai.defineTool(
   {
-    name: 'getWeather',
+    name: 'getWeatherTool',
     description: 'Returns the current weather for a given latitude and longitude.',
     inputSchema: WeatherInputSchema,
     outputSchema: WeatherOutputSchema,
@@ -47,3 +47,7 @@ export const getWeather = ai.defineTool(
     };
   }
 );
+
+export async function getWeather(input: WeatherInput): Promise<WeatherOutput> {
+    return await getWeatherTool(input);
+}
