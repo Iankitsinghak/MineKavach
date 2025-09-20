@@ -39,9 +39,11 @@ export function AppSidebar() {
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton href="#">
-              <AlertCircle />
-              Alerts
+            <SidebarMenuButton href="/dashboard/alerts" asChild isActive={pathname === '/dashboard/alerts'}>
+              <Link href="/dashboard/alerts">
+                <AlertCircle />
+                Alerts
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
