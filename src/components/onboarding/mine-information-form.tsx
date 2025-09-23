@@ -12,6 +12,7 @@ import { CardHeader, CardTitle, CardDescription } from '../ui/card';
 import { ArrowRight, MapPin, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { getAddressFromCoordinates } from '@/ai/tools/geocoding-tool';
 
 const formSchema = z.object({
   mineName: z.string().min(2, { message: 'Mine name must be at least 2 characters.' }),
@@ -74,17 +75,28 @@ export function MineInformationForm({ onSubmit }: MineInformationFormProps) {
     setIsLocating(true);
     setIsFetchingMines(true);
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
         const { latitude, longitude } = position.coords;
         const coords = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
         form.setValue('location', coords, { shouldValidate: true });
-        form.setValue('pinCode', '', { shouldValidate: true }); // Clear pin code
+        
+        try {
+            const address = await getAddressFromCoordinates({ latitude, longitude });
+            form.setValue('pinCode', address.pinCode, { shouldValidate: true });
+             toast({
+                title: 'Location Found',
+                description: `Set to: ${coords}. Pin code found: ${address.pinCode}.`,
+            });
+        } catch (error) {
+             toast({
+                variant: 'destructive',
+                title: 'Could not fetch Pin Code',
+                description: 'Please enter pin code manually.',
+            });
+        }
+
 
         setIsLocating(false);
-        toast({
-            title: 'Location Found',
-            description: `Set to: ${coords}. Please enter pin code manually.`,
-        });
 
         // Simulate fetching nearby mines
         setTimeout(() => {
