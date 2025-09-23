@@ -39,7 +39,7 @@ const getNearbyMinesTool = ai.defineTool(
       throw new Error("Google Maps API key not found.");
     }
 
-    const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${input.latitude},${input.longitude}&radius=50000&type=mine&key=${apiKey}`;
+    const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${input.latitude},${input.longitude}&radius=50000&type=mine&keyword=mine&key=${apiKey}`;
 
     try {
       const response = await fetch(url);
