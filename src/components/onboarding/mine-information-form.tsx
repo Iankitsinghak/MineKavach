@@ -18,16 +18,34 @@ const formSchema = z.object({
   location: z.string().min(5, { message: 'Please enter a valid location or address.' }),
   mineType: z.enum(['iron_ore', 'coal', 'gold', 'copper', 'diamond', 'other']),
   mineSize: z.string().min(2, { message: 'Please provide the mine size.' }),
+  customMineName: z.string().optional(),
+}).superRefine((data, ctx) => {
+    if (data.mineName === 'other' && (!data.customMineName || data.customMineName.length < 2)) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Mine name must be at least 2 characters.",
+            path: ['customMineName'],
+        });
+    }
 });
+
 
 type FormValues = z.infer<typeof formSchema>;
 
 interface MineInformationFormProps {
-  onSubmit: (data: FormValues) => void;
+  onSubmit: (data: any) => void;
 }
+
+const mockNearbyMines = [
+    { id: 'north-star', name: 'North Star Quarry' },
+    { id: 'eagle-peak', name: 'Eagle Peak Mine' },
+    { id: 'crystal-mountain', name: 'Crystal Mountain'},
+];
 
 export function MineInformationForm({ onSubmit }: MineInformationFormProps) {
   const [isLocating, setIsLocating] = useState(false);
+  const [isFetchingMines, setIsFetchingMines] = useState(false);
+  const [nearbyMines, setNearbyMines] = useState<{id: string; name: string}[]>([]);
   const { toast } = useToast();
 
   const form = useForm<FormValues>({
@@ -38,6 +56,8 @@ export function MineInformationForm({ onSubmit }: MineInformationFormProps) {
       mineSize: '',
     },
   });
+
+  const watchMineName = form.watch('mineName');
 
   const handleAutoLocate = () => {
     if (!navigator.geolocation) {
@@ -50,6 +70,7 @@ export function MineInformationForm({ onSubmit }: MineInformationFormProps) {
     }
 
     setIsLocating(true);
+    setIsFetchingMines(true);
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
@@ -60,9 +81,16 @@ export function MineInformationForm({ onSubmit }: MineInformationFormProps) {
             title: 'Location Found',
             description: `Set to: ${coords}`,
         });
+
+        // Simulate fetching nearby mines
+        setTimeout(() => {
+            setNearbyMines(mockNearbyMines);
+            setIsFetchingMines(false);
+        }, 1000);
       },
       (error) => {
         setIsLocating(false);
+        setIsFetchingMines(false);
         toast({
           variant: 'destructive',
           title: 'Geolocation Error',
@@ -72,6 +100,15 @@ export function MineInformationForm({ onSubmit }: MineInformationFormProps) {
       }
     );
   };
+  
+  const processSubmit = (data: FormValues) => {
+    const finalData = { ...data };
+    if (data.mineName === 'other') {
+      finalData.mineName = data.customMineName!;
+    }
+    delete finalData.customMineName;
+    onSubmit(finalData);
+  }
 
   return (
     <>
@@ -80,46 +117,95 @@ export function MineInformationForm({ onSubmit }: MineInformationFormProps) {
             <CardDescription>Start by telling us about your mining operation.</CardDescription>
         </CardHeader>
         <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-            control={form.control}
-            name="mineName"
-            render={({ field }) => (
-                <FormItem>
-                <FormLabel>Mine Name</FormLabel>
-                <FormControl>
-                    <Input placeholder="e.g., North Star Quarry" {...field} />
-                </FormControl>
-                <FormMessage />
-                </FormItem>
-            )}
+        <form onSubmit={form.handleSubmit(processSubmit)} className="space-y-6">
+             <FormField
+                control={form.control}
+                name="location"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Location</FormLabel>
+                    <div className="relative">
+                        <FormControl>
+                            <Input placeholder="GPS coordinates or full address" {...field} />
+                        </FormControl>
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
+                            onClick={handleAutoLocate}
+                            disabled={isLocating}
+                            aria-label="Auto-locate"
+                        >
+                            {isLocating ? <Loader2 className="animate-spin" /> : <MapPin />}
+                        </Button>
+                    </div>
+                    <FormMessage />
+                    </FormItem>
+                )}
             />
-            <FormField
-            control={form.control}
-            name="location"
-            render={({ field }) => (
-                <FormItem>
-                <FormLabel>Location</FormLabel>
-                 <div className="relative">
-                    <FormControl>
-                        <Input placeholder="GPS coordinates or full address" {...field} />
-                    </FormControl>
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
-                        onClick={handleAutoLocate}
-                        disabled={isLocating}
-                        aria-label="Auto-locate"
-                    >
-                        {isLocating ? <Loader2 className="animate-spin" /> : <MapPin />}
-                    </Button>
-                </div>
-                <FormMessage />
-                </FormItem>
+            
+            { isFetchingMines && <div className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="animate-spin h-4 w-4" /> Finding nearby mines...</div> }
+
+            { nearbyMines.length > 0 && !isFetchingMines && (
+                <>
+                    <FormField
+                    control={form.control}
+                    name="mineName"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Mine Name</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select a nearby mine" />
+                            </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                                {nearbyMines.map(mine => (
+                                    <SelectItem key={mine.id} value={mine.name}>{mine.name}</SelectItem>
+                                ))}
+                                <SelectItem value="other">Other (please specify)</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    { watchMineName === 'other' && (
+                        <FormField
+                            control={form.control}
+                            name="customMineName"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Custom Mine Name</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="e.g., North Star Quarry" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    )}
+                </>
             )}
-            />
+
+            { nearbyMines.length === 0 && !isFetchingMines && (
+                 <FormField
+                    control={form.control}
+                    name="mineName"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Mine Name</FormLabel>
+                        <FormControl>
+                            <Input placeholder="e.g., North Star Quarry" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            )}
+            
              <FormField
               control={form.control}
               name="mineType"
