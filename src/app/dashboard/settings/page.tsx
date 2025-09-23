@@ -55,20 +55,20 @@ export default function SettingsPage() {
             <CardContent className="space-y-4">
                 <div className="space-y-2">
                     <Label htmlFor="mineName">Mine Name</Label>
-                    <Input id="mineName" defaultValue={mineInfo.mineName} readOnly />
+                    <Input id="mineName" defaultValue={mineInfo.mineName} />
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="mineLocation">Location</Label>
-                    <Input id="mineLocation" defaultValue={mineInfo.location} readOnly />
+                    <Input id="mineLocation" defaultValue={mineInfo.location} />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <Label htmlFor="mineType">Mine Type</Label>
-                        <Input id="mineType" defaultValue={mineInfo.mineType} readOnly />
+                        <Input id="mineType" defaultValue={mineInfo.mineType} />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="mineSize">Mine Size</Label>
-                        <Input id="mineSize" defaultValue={mineInfo.mineSize} readOnly />
+                        <Input id="mineSize" defaultValue={mineInfo.mineSize} />
                     </div>
                 </div>
             </CardContent>
