@@ -9,7 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Search, Bell, AlertCircle, Clock } from 'lucide-react';
+import { Search, Bell, AlertCircle, Clock, PanelLeft } from 'lucide-react';
 import { SidebarTrigger } from '../ui/sidebar';
 import { mockAlerts } from '@/lib/data';
 import { Badge } from '@/components/ui/badge';
@@ -55,7 +55,7 @@ export function DashboardHeader() {
             <span className="sr-only">Toggle notifications</span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-80">
+        <DropdownMenuContent align="end" className="w-80 md:w-96">
             <DropdownMenuLabel className="flex items-center justify-between">
                 <span>Recent Alerts</span>
                 <Link href="/dashboard/alerts" className="text-xs font-normal text-primary hover:underline">
@@ -70,13 +70,13 @@ export function DashboardHeader() {
                         <DropdownMenuItem key={alert.id} asChild>
                              <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <Link href="/dashboard/alerts" className="flex items-start gap-3">
+                                    <Link href="/dashboard/alerts" className="flex items-start gap-3 p-2 hover:bg-muted/50 rounded-md">
                                         <div className="mt-1">
                                              <Icon />
                                         </div>
-                                        <div className="flex-1 space-y-1">
+                                        <div className="flex-1 space-y-1.5">
                                             <p className="text-sm font-medium leading-none">{alert.location}</p>
-                                            <p className="text-sm text-muted-foreground truncate">{alert.description}</p>
+                                            <p className="text-sm text-muted-foreground">{alert.description}</p>
                                         </div>
                                     </Link>
                                  </TooltipTrigger>
