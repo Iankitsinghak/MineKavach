@@ -6,7 +6,7 @@ import { Toaster } from '@/components/ui/toaster';
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata: Metadata = {
-  title: 'Rockfall Sentinel',
+  title: 'MineKavach',
   description: 'AI-powered predictive analytics for rockfall prevention in open-pit mines.',
 };
 

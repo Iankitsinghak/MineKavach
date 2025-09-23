@@ -25,7 +25,7 @@ export function AppSidebar() {
       <SidebarHeader>
         <div className="flex items-center gap-2">
           <Mountain className="size-6 text-primary" />
-          <h1 className="text-lg font-semibold">Rockfall Sentinel</h1>
+          <h1 className="text-lg font-semibold">MineKavach</h1>
         </div>
       </SidebarHeader>
       <SidebarContent>
