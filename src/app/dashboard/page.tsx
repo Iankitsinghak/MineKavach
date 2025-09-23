@@ -10,22 +10,15 @@ export default function DashboardPage() {
     <div className="flex flex-col gap-6 lg:gap-8">
       <KeyMetrics />
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-        <div className="lg:col-span-2">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
+        <div className="lg:col-span-3 grid gap-6 lg:gap-8">
           <RiskMap />
+          <SensorDataChart />
         </div>
-        <div className="space-y-6 lg:space-y-8">
-          <DataSources />
+        <div className="lg:col-span-2 grid gap-6 lg:gap-8 auto-rows-max">
           <ActionPlanGenerator />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 xl:grid-cols-5 gap-6 lg:gap-8">
-        <div className="xl:col-span-3">
-            <SensorDataChart />
-        </div>
-        <div className="xl:col-span-2">
-            <RecentAlerts />
+          <DataSources />
+          <RecentAlerts />
         </div>
       </div>
     </div>

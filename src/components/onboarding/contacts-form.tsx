@@ -7,7 +7,7 @@ import { Button } from '../ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { CardHeader, CardTitle, CardDescription } from '../ui/card';
-import { ArrowLeft, Trash2, PlusCircle } from 'lucide-react';
+import { ArrowLeft, Trash2, PlusCircle, CheckCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 const contactSchema = z.object({
@@ -44,7 +44,6 @@ export function ContactsForm({ onSubmit, onBack }: ContactsFormProps) {
 
     const handleFinish = (data: FormValues) => {
       onSubmit({ contacts: data.contacts });
-      router.push('/dashboard');
     }
 
     return (
@@ -134,6 +133,7 @@ export function ContactsForm({ onSubmit, onBack }: ContactsFormProps) {
                         </Button>
                         <Button type="submit">
                             Finish Setup
+                            <CheckCircle className="ml-2" />
                         </Button>
                     </div>
                 </form>
