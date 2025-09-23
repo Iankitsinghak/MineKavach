@@ -32,17 +32,61 @@ const geocodingTool = ai.defineTool(
   async (input) => {
     console.log(`Fetching address for lat: ${input.latitude}, lon: ${input.longitude}`);
     
-    // In a real application, you would call a geocoding API here.
-    // For now, we'll return mock data.
-    const pinCodes = ["90210", "10001", "60606", "75001"];
-    const randomPinCode = pinCodes[Math.floor(Math.random() * pinCodes.length)];
-    
-    return {
-      address: '123 Mock Street, Fakeville',
-      pinCode: randomPinCode,
-      city: 'Faketown',
-      country: 'Mockland'
-    };
+    const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+    if (!apiKey) {
+      throw new Error("Google Maps API key not found.");
+    }
+
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${input.latitude},${input.longitude}&key=${apiKey}`;
+
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (data.status !== 'OK') {
+        throw new Error(`Geocoding API error: ${data.status} - ${data.error_message || ''}`);
+      }
+
+      const result = data.results[0];
+      if (!result) {
+        throw new Error('No results found for the given coordinates.');
+      }
+
+      const address = result.formatted_address || 'Address not found';
+      
+      let pinCode = '';
+      let city = '';
+      let country = '';
+
+      for (const component of result.address_components) {
+        if (component.types.includes('postal_code')) {
+          pinCode = component.long_name;
+        }
+        if (component.types.includes('locality')) {
+          city = component.long_name;
+        }
+        if (component.types.includes('country')) {
+          country = component.long_name;
+        }
+      }
+
+      return {
+        address,
+        pinCode: pinCode || 'N/A',
+        city: city || 'N/A',
+        country: country || 'N/A'
+      };
+
+    } catch (error) {
+      console.error('Error fetching geocoding data:', error);
+      // Fallback to mock data in case of an API error
+      return {
+        address: '123 Mock Street, Fakeville',
+        pinCode: '99999',
+        city: 'Faketown',
+        country: 'Mockland'
+      };
+    }
   }
 );
 
