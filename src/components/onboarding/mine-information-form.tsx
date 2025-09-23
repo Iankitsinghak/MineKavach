@@ -16,6 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 const formSchema = z.object({
   mineName: z.string().min(2, { message: 'Mine name must be at least 2 characters.' }),
   location: z.string().min(5, { message: 'Please enter a valid location or address.' }),
+  pinCode: z.string().min(5, { message: 'Please enter a valid pin code.' }),
   mineType: z.enum(['iron_ore', 'coal', 'gold', 'copper', 'diamond', 'other']),
   mineSize: z.string().min(2, { message: 'Please provide the mine size.' }),
   customMineName: z.string().optional(),
@@ -53,6 +54,7 @@ export function MineInformationForm({ onSubmit }: MineInformationFormProps) {
     defaultValues: {
       mineName: '',
       location: '',
+      pinCode: '',
       mineSize: '',
     },
   });
@@ -76,6 +78,11 @@ export function MineInformationForm({ onSubmit }: MineInformationFormProps) {
         const { latitude, longitude } = position.coords;
         const coords = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
         form.setValue('location', coords, { shouldValidate: true });
+        
+        // Simulate fetching pin code
+        const mockPinCode = '90210';
+        form.setValue('pinCode', mockPinCode, { shouldValidate: true });
+
         setIsLocating(false);
         toast({
             title: 'Location Found',
@@ -118,32 +125,47 @@ export function MineInformationForm({ onSubmit }: MineInformationFormProps) {
         </CardHeader>
         <Form {...form}>
         <form onSubmit={form.handleSubmit(processSubmit)} className="space-y-6">
-             <FormField
-                control={form.control}
-                name="location"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Location</FormLabel>
-                    <div className="relative">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField
+                    control={form.control}
+                    name="location"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Location</FormLabel>
+                        <div className="relative">
+                            <FormControl>
+                                <Input placeholder="GPS coordinates or full address" {...field} />
+                            </FormControl>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
+                                onClick={handleAutoLocate}
+                                disabled={isLocating}
+                                aria-label="Auto-locate"
+                            >
+                                {isLocating ? <Loader2 className="animate-spin" /> : <MapPin />}
+                            </Button>
+                        </div>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                 <FormField
+                    control={form.control}
+                    name="pinCode"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Pin Code</FormLabel>
                         <FormControl>
-                            <Input placeholder="GPS coordinates or full address" {...field} />
+                            <Input placeholder="e.g. 90210" {...field} disabled={isLocating} />
                         </FormControl>
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
-                            onClick={handleAutoLocate}
-                            disabled={isLocating}
-                            aria-label="Auto-locate"
-                        >
-                            {isLocating ? <Loader2 className="animate-spin" /> : <MapPin />}
-                        </Button>
-                    </div>
-                    <FormMessage />
-                    </FormItem>
-                )}
-            />
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            </div>
             
             { isFetchingMines && <div className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="animate-spin h-4 w-4" /> Finding nearby mines...</div> }
 
