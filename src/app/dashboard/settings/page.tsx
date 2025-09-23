@@ -8,6 +8,9 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { MapPin, Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { getAddressFromCoordinates } from '@/ai/tools/geocoding-tool';
 
 interface OnboardingData {
     mineName?: string;
@@ -20,6 +23,8 @@ interface OnboardingData {
 export default function SettingsPage() {
     const [mineInfo, setMineInfo] = useState<OnboardingData>({});
     const [mineType, setMineType] = useState<string | undefined>();
+    const [isLocating, setIsLocating] = useState(false);
+    const { toast } = useToast();
 
     useEffect(() => {
         const onboardingDataString = localStorage.getItem('onboardingData');
@@ -39,6 +44,58 @@ export default function SettingsPage() {
         }
     }, []);
 
+    const handleAutoLocate = () => {
+        if (!navigator.geolocation) {
+            toast({
+                variant: 'destructive',
+                title: 'Geolocation Not Supported',
+                description: 'Your browser does not support geolocation.',
+            });
+            return;
+        }
+
+        setIsLocating(true);
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                const { latitude, longitude } = position.coords;
+                const coords = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+                setMineInfo(prev => ({...prev, location: coords}));
+                
+                try {
+                    const address = await getAddressFromCoordinates({ latitude, longitude });
+                    // Assuming there's a pinCode field to update
+                    // setMineInfo(prev => ({...prev, pinCode: address.pinCode}));
+                    toast({
+                        title: 'Location Found',
+                        description: `Set to: ${coords}.`,
+                    });
+                } catch (error) {
+                    toast({
+                        variant: 'destructive',
+                        title: 'Could not fetch Address Details',
+                        description: 'Location set, but address details failed.',
+                    });
+                } finally {
+                    setIsLocating(false);
+                }
+            },
+            (error) => {
+                setIsLocating(false);
+                toast({
+                    variant: 'destructive',
+                    title: 'Geolocation Error',
+                    description: 'Could not retrieve your location. Please enter it manually.',
+                });
+                console.error('Geolocation Error:', error);
+            }
+        );
+    };
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { id, value } = e.target;
+        setMineInfo(prev => ({...prev, [id]: value}));
+    }
+
 
   return (
     <div className="space-y-6">
@@ -57,11 +114,24 @@ export default function SettingsPage() {
             <CardContent className="space-y-4">
                 <div className="space-y-2">
                     <Label htmlFor="mineName">Mine Name</Label>
-                    <Input id="mineName" defaultValue={mineInfo.mineName} />
+                    <Input id="mineName" value={mineInfo.mineName || ''} onChange={handleInputChange} />
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="mineLocation">Location</Label>
-                    <Input id="mineLocation" defaultValue={mineInfo.location} />
+                    <Label htmlFor="location">Location</Label>
+                    <div className="relative">
+                        <Input id="location" value={mineInfo.location || ''} onChange={handleInputChange} />
+                         <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
+                            onClick={handleAutoLocate}
+                            disabled={isLocating}
+                            aria-label="Auto-locate"
+                        >
+                            {isLocating ? <Loader2 className="animate-spin" /> : <MapPin />}
+                        </Button>
+                    </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -82,7 +152,7 @@ export default function SettingsPage() {
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="mineSize">Mine Size</Label>
-                        <Input id="mineSize" defaultValue={mineInfo.mineSize} />
+                        <Input id="mineSize" value={mineInfo.mineSize || ''} onChange={handleInputChange} />
                     </div>
                 </div>
             </CardContent>
@@ -177,3 +247,5 @@ export default function SettingsPage() {
     </div>
   );
 }
+
+    
