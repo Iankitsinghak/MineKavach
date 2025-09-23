@@ -11,7 +11,7 @@ export function RiskMap() {
         <CardTitle>Real-Time Risk Map</CardTitle>
         <CardDescription>Vulnerable zones based on multi-source data correlation.</CardDescription>
       </CardHeader>
-      <CardContent className="flex-grow relative min-h-[400px]">
+      <CardContent className="flex-grow relative min-h-[300px] flex-shrink overflow-hidden">
         {riskMapImage && (
           <Image
             src={riskMapImage.imageUrl}
