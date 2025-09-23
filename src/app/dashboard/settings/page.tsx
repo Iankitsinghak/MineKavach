@@ -1,13 +1,43 @@
 
+'use client';
+
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
+
+interface OnboardingData {
+    mineName?: string;
+    location?: string;
+    mineType?: string;
+    mineSize?: string;
+}
+
 
 export default function SettingsPage() {
+    const [mineInfo, setMineInfo] = useState<OnboardingData>({});
+
+    useEffect(() => {
+        const onboardingDataString = localStorage.getItem('onboardingData');
+        if (onboardingDataString) {
+            try {
+                const data = JSON.parse(onboardingDataString);
+                setMineInfo({
+                    mineName: data.mineName || 'N/A',
+                    location: data.location || 'N/A',
+                    mineType: data.mineType || 'N/A',
+                    mineSize: data.mineSize || 'N/A',
+                });
+            } catch (error) {
+                console.error("Failed to parse onboarding data:", error);
+            }
+        }
+    }, []);
+
+
   return (
     <div className="space-y-6">
       <Card>
@@ -16,6 +46,33 @@ export default function SettingsPage() {
           <CardDescription>Manage your account and application preferences.</CardDescription>
         </CardHeader>
       </Card>
+
+        <Card>
+            <CardHeader>
+                <CardTitle>Mine Information</CardTitle>
+                <CardDescription>Details about your mining operation.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div className="space-y-2">
+                    <Label htmlFor="mineName">Mine Name</Label>
+                    <Input id="mineName" defaultValue={mineInfo.mineName} readOnly />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="mineLocation">Location</Label>
+                    <Input id="mineLocation" defaultValue={mineInfo.location} readOnly />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="mineType">Mine Type</Label>
+                        <Input id="mineType" defaultValue={mineInfo.mineType} readOnly />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="mineSize">Mine Size</Label>
+                        <Input id="mineSize" defaultValue={mineInfo.mineSize} readOnly />
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
 
       <Card>
         <CardHeader>
