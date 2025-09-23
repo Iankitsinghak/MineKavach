@@ -22,22 +22,24 @@ export function RiskMap() {
           />
         )}
       </CardContent>
-      <CardFooter className="flex justify-center gap-6 pt-4">
-        <div className="flex items-center gap-2">
-          <div className="h-4 w-4 rounded-full bg-green-500"></div>
-          <span className="text-sm text-muted-foreground">Low Risk</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="h-4 w-4 rounded-full bg-yellow-500"></div>
-          <span className="text-sm text-muted-foreground">Medium Risk</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="h-4 w-4 rounded-full bg-red-500"></div>
-          <span className="text-sm text-muted-foreground">High Risk</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="h-4 w-4 rounded-full bg-purple-500"></div>
-          <span className="text-sm text-muted-foreground">Critical</span>
+      <CardFooter className="pt-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-2 w-full">
+            <div className="flex items-center gap-2">
+              <div className="h-3 w-3 rounded-full bg-green-500"></div>
+              <span className="text-sm text-muted-foreground">Low</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="h-3 w-3 rounded-full bg-yellow-500"></div>
+              <span className="text-sm text-muted-foreground">Medium</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="h-3 w-3 rounded-full bg-red-500"></div>
+              <span className="text-sm text-muted-foreground">High</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="h-3 w-3 rounded-full bg-purple-500"></div>
+              <span className="text-sm text-muted-foreground">Critical</span>
+            </div>
         </div>
       </CardFooter>
     </Card>
