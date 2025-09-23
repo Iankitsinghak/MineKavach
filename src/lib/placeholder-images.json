@@ -1,10 +1,9 @@
-
 {
   "placeholderImages": [
     {
       "id": "risk-map",
       "description": "A color-based heatmap of a mine, indicating different levels of risk in various zones.",
-      "imageUrl": "https://picsum.photos/seed/heatmap/1200/800",
+      "imageUrl": "/risk-map.png",
       "imageHint": "heatmap mine"
     }
   ]
