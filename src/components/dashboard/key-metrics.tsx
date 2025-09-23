@@ -54,6 +54,26 @@ export function KeyMetrics() {
       }
     };
 
+    const onboardingDataString = localStorage.getItem('onboardingData');
+    if (onboardingDataString) {
+        try {
+            const onboardingData = JSON.parse(onboardingDataString);
+            const location = onboardingData.location;
+            if (location && typeof location === 'string') {
+                const [latStr, lonStr] = location.split(',').map(s => s.trim());
+                const lat = parseFloat(latStr);
+                const lon = parseFloat(lonStr);
+                if (!isNaN(lat) && !isNaN(lon)) {
+                    fetchWeather(lat, lon);
+                    return;
+                }
+            }
+        } catch(e) {
+            console.error("Could not parse onboarding location", e);
+        }
+    }
+
+
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
