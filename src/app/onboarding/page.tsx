@@ -26,6 +26,8 @@ export default function OnboardingPage() {
     if (step === totalSteps) {
         console.log("Onboarding complete:", newFormData);
         // Here you would typically send the data to your backend
+        // For now, we'll save it to localStorage
+        localStorage.setItem('onboardingData', JSON.stringify(newFormData));
         router.push('/dashboard');
     } else {
         nextStep();
