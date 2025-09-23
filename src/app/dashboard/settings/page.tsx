@@ -19,6 +19,7 @@ interface OnboardingData {
 
 export default function SettingsPage() {
     const [mineInfo, setMineInfo] = useState<OnboardingData>({});
+    const [mineType, setMineType] = useState<string | undefined>();
 
     useEffect(() => {
         const onboardingDataString = localStorage.getItem('onboardingData');
@@ -31,6 +32,7 @@ export default function SettingsPage() {
                     mineType: data.mineType || 'N/A',
                     mineSize: data.mineSize || 'N/A',
                 });
+                setMineType(data.mineType);
             } catch (error) {
                 console.error("Failed to parse onboarding data:", error);
             }
@@ -64,7 +66,19 @@ export default function SettingsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <Label htmlFor="mineType">Mine Type</Label>
-                        <Input id="mineType" defaultValue={mineInfo.mineType} />
+                         <Select value={mineType} onValueChange={setMineType}>
+                            <SelectTrigger id="mineType">
+                                <SelectValue placeholder="Select mine type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="iron_ore">Iron Ore</SelectItem>
+                                <SelectItem value="coal">Coal</SelectItem>
+                                <SelectItem value="gold">Gold</SelectItem>
+                                <SelectItem value="copper">Copper</SelectItem>
+                                <SelectItem value="diamond">Diamond</SelectItem>
+                                <SelectItem value="other">Other</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="mineSize">Mine Size</Label>
