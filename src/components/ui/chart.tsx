@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -153,6 +154,11 @@ const ChartTooltipContent = React.forwardRef<
           </div>
         )
       }
+      
+      if (label) {
+        return <div className={cn("font-medium", labelClassName)}>{label}</div>
+      }
+
 
       if (!value) {
         return null

@@ -1,9 +1,12 @@
+
 'use client';
 
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts';
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Line, LineChart, Legend } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
+import { ChartContainer, ChartTooltipContent, ChartLegend, ChartLegendContent} from '@/components/ui/chart';
 import { mockSensorData } from '@/lib/data';
+import { Button } from '@/components/ui/button';
+import React from 'react';
 
 const chartConfig = {
   displacement: {
@@ -21,6 +24,8 @@ const chartConfig = {
 };
 
 export function SensorDataChart() {
+  const [activeChart, setActiveChart] = React.useState<keyof typeof chartConfig>('displacement');
+
   return (
     <Card>
       <CardHeader>
@@ -29,24 +34,50 @@ export function SensorDataChart() {
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-[300px] w-full">
-          <BarChart data={mockSensorData} margin={{ top: 20, right: 20, bottom: 5, left: 0 }}>
+          <LineChart
+            data={mockSensorData}
+            margin={{
+              top: 24,
+              right: 24,
+              bottom: 24,
+              left: 24,
+            }}
+          >
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="date"
               tickLine={false}
-              tickMargin={10}
               axisLine={false}
-              tickFormatter={(value) => value.slice(0, 3)}
+              tickMargin={8}
+              tickFormatter={(value) => {
+                const date = new Date(value + ' 2024'); // Add a year for proper parsing
+                if (isNaN(date.getTime())) return value;
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+              }}
             />
-             <YAxis />
+             <YAxis
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              tickCount={3}
+              domain={['dataMin - 10', 'dataMax + 10']}
+            />
             <Tooltip
-              cursor={false}
-              content={<ChartTooltipContent indicator="dot" />}
+              cursor={true}
+              content={<ChartTooltipContent indicator="line" />}
             />
-            <Bar dataKey="displacement" fill="var(--color-displacement)" radius={4} />
-            <Bar dataKey="strain" fill="var(--color-strain)" radius={4} className="hidden" />
-            <Bar dataKey="porePressure" fill="var(--color-porePressure)" radius={4} className="hidden" />
-          </BarChart>
+            <Legend content={<ChartLegendContent />} />
+            {Object.keys(chartConfig).map((key) => (
+               <Line
+                key={key}
+                dataKey={key}
+                type="monotone"
+                stroke={`var(--color-${key})`}
+                strokeWidth={2}
+                dot={false}
+              />
+            ))}
+          </LineChart>
         </ChartContainer>
       </CardContent>
     </Card>
