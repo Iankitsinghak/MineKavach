@@ -16,6 +16,7 @@ const sensors = [
   { id: 'pore_pressure', label: 'Pore Pressure Sensor' },
   { id: 'temperature', label: 'Temperature Sensor' },
   { id: 'humidity', label: 'Humidity Sensor' },
+  { id: 'alert_siren', label: 'Alert Sirens' },
 ] as const;
 
 const formSchema = z.object({
