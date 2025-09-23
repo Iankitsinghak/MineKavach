@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useEffect } from 'react';
 import { RealtimeSensorChart } from '@/components/dashboard/realtime-sensor-chart';
@@ -5,16 +6,16 @@ import { mockDataSources } from '@/lib/data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { DataSource } from '@/lib/types';
 
-const sensorNameMapping: { [key: string]: string[] } = {
-    vibration: [],
-    tilt: [],
+const sensorTypeToNameMapping: { [key: string]: string[] } = {
+    vibration: [], // No specific sensor name in mockDataSources for this
+    tilt: [], // No specific sensor name in mockDataSources for this
     strain: ['Strain Gauge A'],
     pore_pressure: ['Pore Pressure Sensor 3B'],
     temperature: ['Temperature Sensor'],
-    humidity: [],
-    alert_siren: [],
-    rainfall: ['Rainfall Gauge'], 
-    displacement: ['Displacement Sensor 1']
+    humidity: [], // No specific sensor name in mockDataSources for this
+    alert_siren: [], // Not a sensor, so no mapping
+    displacement: ['Displacement Sensor 1'],
+    rainfall: ['Rainfall Gauge'],
 };
 
 
@@ -24,48 +25,42 @@ export default function SensorsPage() {
 
   useEffect(() => {
     const onboardingDataString = localStorage.getItem('onboardingData');
+    let sourcesToShow: DataSource[] = [];
+    
+    const allKnownSensors = mockDataSources.filter(s => s.type === 'Sensor' || s.type === 'Environmental');
+
     if (onboardingDataString) {
       try {
         const onboardingData = JSON.parse(onboardingDataString);
-        const selectedSensors = onboardingData?.dataSources || {};
+        const selectedSensorTypes = onboardingData?.dataSources || {};
         
-        const selectedSensorNames: string[] = Object.entries(selectedSensors)
+        const selectedSensorNames: string[] = Object.entries(selectedSensorTypes)
           .filter(([, value]) => value === true)
-          .flatMap(([key]) => sensorNameMapping[key as keyof typeof sensorNameMapping] || []);
+          .flatMap(([key]) => sensorTypeToNameMapping[key as keyof typeof sensorTypeToNameMapping] || []);
 
-        // Also include sensors that might not be in the mapping but are of type 'Sensor' or 'Environmental'
-        const defaultSensors = mockDataSources
-          .filter(s => (s.type === 'Sensor' || s.type === 'Environmental'))
-          .map(s => s.name);
-        
-        const allRelevantSensorNames = Array.from(new Set([...selectedSensorNames, ...defaultSensors.filter(name => {
-           if (name.includes('Displacement')) return selectedSensors.displacement;
-           if (name.includes('Strain')) return selectedSensors.strain;
-           if (name.includes('Pore Pressure')) return selectedSensors.pore_pressure;
-           if (name.includes('Rainfall')) return true; // Always show rainfall
-           if (name.includes('Temperature')) return selectedSensors.temperature;
-           return false;
-        })]));
+        // Always include Rainfall Gauge if it exists, as it's a default environmental sensor.
+        if (mockDataSources.find(s => s.name === 'Rainfall Gauge')) {
+            selectedSensorNames.push('Rainfall Gauge');
+        }
 
+        const uniqueSensorNames = Array.from(new Set(selectedSensorNames));
 
-        const filteredSensors = mockDataSources.filter(s =>
-          (s.type === 'Sensor' || s.type === 'Environmental') && allRelevantSensorNames.includes(s.name)
+        sourcesToShow = allKnownSensors.filter(s =>
+            uniqueSensorNames.includes(s.name)
         );
 
-        setVisibleSensors(filteredSensors);
       } catch (error) {
-        console.error("Failed to parse onboarding data from localStorage", error);
-        // Fallback to showing all sensors if data is corrupt
-        const allSensors = mockDataSources.filter(s => s.type === 'Sensor' || s.type === 'Environmental');
-        setVisibleSensors(allSensors);
+        console.error("Failed to parse onboarding data from localStorage, showing all sensors.", error);
+        sourcesToShow = allKnownSensors;
       }
     } else {
-      // Fallback to showing all sensors if no onboarding data is found
-      const allSensors = mockDataSources.filter(s => s.type === 'Sensor' || s.type === 'Environmental');
-      setVisibleSensors(allSensors);
+        console.warn("No onboarding data found in localStorage, showing all sensors.");
+      sourcesToShow = allKnownSensors;
     }
     
-    // Set other sources
+    setVisibleSensors(sourcesToShow);
+
+    // Set other sources (non-sensor types)
     const otherDataSources = mockDataSources.filter(s => s.type !== 'Sensor' && s.type !== 'Environmental');
     setOtherSources(otherDataSources);
 
@@ -108,3 +103,4 @@ export default function SensorsPage() {
     </div>
   );
 }
+
