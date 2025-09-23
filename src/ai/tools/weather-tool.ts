@@ -34,17 +34,49 @@ const getWeatherTool = ai.defineTool(
   async (input) => {
     console.log(`Fetching weather for lat: ${input.latitude}, lon: ${input.longitude}`);
     
-    // In a real application, you would call a weather API here.
-    // For now, we'll return mock data.
-    const conditions = ["Light Rain", "Heavy Rain", "Cloudy", "Partly Cloudy", "Sunny"];
-    const randomCondition = conditions[Math.floor(Math.random() * conditions.length)];
-    
-    return {
-      temperature: Math.random() * 25 + 5, // Temp between 5°C and 30°C
-      condition: randomCondition,
-      windSpeed: Math.random() * 40, // Wind speed up to 40 km/h
-      humidity: Math.random() * 60 + 40, // Humidity between 40% and 100%
-    };
+    const apiKey = process.env.OPENWEATHERMAP_API_KEY;
+    if (!apiKey) {
+      console.warn("OpenWeatherMap API key not found. Returning mock data.");
+      // Fallback to mock data if API key is missing
+      const conditions = ["Light Rain", "Heavy Rain", "Cloudy", "Partly Cloudy", "Sunny"];
+      const randomCondition = conditions[Math.floor(Math.random() * conditions.length)];
+      return {
+        temperature: Math.random() * 25 + 5, // Temp between 5°C and 30°C
+        condition: randomCondition,
+        windSpeed: Math.random() * 40, // Wind speed up to 40 km/h
+        humidity: Math.random() * 60 + 40, // Humidity between 40% and 100%
+      };
+    }
+
+    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${input.latitude}&lon=${input.longitude}&appid=${apiKey}&units=metric`;
+
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (response.status !== 200) {
+        throw new Error(`OpenWeatherMap API error: ${data.message}`);
+      }
+
+      return {
+        temperature: data.main.temp,
+        condition: data.weather[0]?.main || 'N/A',
+        windSpeed: data.wind.speed * 3.6, // Convert m/s to km/h
+        humidity: data.main.humidity,
+      };
+
+    } catch (error) {
+      console.error('Error fetching real weather data:', error);
+      // Fallback to mock data in case of an API error
+      const conditions = ["Light Rain", "Heavy Rain", "Cloudy", "Partly Cloudy", "Sunny"];
+      const randomCondition = conditions[Math.floor(Math.random() * conditions.length)];
+      return {
+        temperature: Math.random() * 25 + 5,
+        condition: randomCondition,
+        windSpeed: Math.random() * 40,
+        humidity: Math.random() * 60 + 40,
+      };
+    }
   }
 );
 
