@@ -78,15 +78,12 @@ export function MineInformationForm({ onSubmit }: MineInformationFormProps) {
         const { latitude, longitude } = position.coords;
         const coords = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
         form.setValue('location', coords, { shouldValidate: true });
-        
-        // Simulate fetching pin code
-        const mockPinCode = '90210';
-        form.setValue('pinCode', mockPinCode, { shouldValidate: true });
+        form.setValue('pinCode', '', { shouldValidate: true }); // Clear pin code
 
         setIsLocating(false);
         toast({
             title: 'Location Found',
-            description: `Set to: ${coords}`,
+            description: `Set to: ${coords}. Please enter pin code manually.`,
         });
 
         // Simulate fetching nearby mines
@@ -159,7 +156,7 @@ export function MineInformationForm({ onSubmit }: MineInformationFormProps) {
                         <FormItem>
                         <FormLabel>Pin Code</FormLabel>
                         <FormControl>
-                            <Input placeholder="e.g. 90210" {...field} disabled={isLocating} />
+                            <Input placeholder="e.g. 90210" {...field} />
                         </FormControl>
                         <FormMessage />
                         </FormItem>
