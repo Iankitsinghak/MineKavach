@@ -9,7 +9,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CardHeader, CardTitle, CardDescription } from '../ui/card';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, MapPin, Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
 
 const formSchema = z.object({
   mineName: z.string().min(2, { message: 'Mine name must be at least 2 characters.' }),
@@ -25,6 +27,9 @@ interface MineInformationFormProps {
 }
 
 export function MineInformationForm({ onSubmit }: MineInformationFormProps) {
+  const [isLocating, setIsLocating] = useState(false);
+  const { toast } = useToast();
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -33,6 +38,40 @@ export function MineInformationForm({ onSubmit }: MineInformationFormProps) {
       mineSize: '',
     },
   });
+
+  const handleAutoLocate = () => {
+    if (!navigator.geolocation) {
+      toast({
+        variant: 'destructive',
+        title: 'Geolocation Not Supported',
+        description: 'Your browser does not support geolocation.',
+      });
+      return;
+    }
+
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        const coords = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+        form.setValue('location', coords, { shouldValidate: true });
+        setIsLocating(false);
+        toast({
+            title: 'Location Found',
+            description: `Set to: ${coords}`,
+        });
+      },
+      (error) => {
+        setIsLocating(false);
+        toast({
+          variant: 'destructive',
+          title: 'Geolocation Error',
+          description: 'Could not retrieve your location. Please enter it manually.',
+        });
+        console.error('Geolocation Error:', error);
+      }
+    );
+  };
 
   return (
     <>
@@ -61,9 +100,22 @@ export function MineInformationForm({ onSubmit }: MineInformationFormProps) {
             render={({ field }) => (
                 <FormItem>
                 <FormLabel>Location</FormLabel>
-                <FormControl>
-                    <Input placeholder="GPS coordinates or full address" {...field} />
-                </FormControl>
+                 <div className="relative">
+                    <FormControl>
+                        <Input placeholder="GPS coordinates or full address" {...field} />
+                    </FormControl>
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
+                        onClick={handleAutoLocate}
+                        disabled={isLocating}
+                        aria-label="Auto-locate"
+                    >
+                        {isLocating ? <Loader2 className="animate-spin" /> : <MapPin />}
+                    </Button>
+                </div>
                 <FormMessage />
                 </FormItem>
             )}
