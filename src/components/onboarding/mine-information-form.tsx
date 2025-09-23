@@ -13,6 +13,7 @@ import { ArrowRight, MapPin, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { getAddressFromCoordinates } from '@/ai/tools/geocoding-tool';
+import { getNearbyMines } from '@/ai/tools/nearby-mines-tool';
 
 const formSchema = z.object({
   mineName: z.string().min(2, { message: 'Mine name must be at least 2 characters.' }),
@@ -37,12 +38,6 @@ type FormValues = z.infer<typeof formSchema>;
 interface MineInformationFormProps {
   onSubmit: (data: any) => void;
 }
-
-const mockNearbyMines = [
-    { id: 'north-star', name: 'North Star Quarry' },
-    { id: 'eagle-peak', name: 'Eagle Peak Mine' },
-    { id: 'crystal-mountain', name: 'Crystal Mountain'},
-];
 
 export function MineInformationForm({ onSubmit }: MineInformationFormProps) {
   const [isLocating, setIsLocating] = useState(false);
@@ -93,16 +88,35 @@ export function MineInformationForm({ onSubmit }: MineInformationFormProps) {
                 title: 'Could not fetch Pin Code',
                 description: 'Please enter pin code manually.',
             });
+        } finally {
+            setIsLocating(false);
         }
 
-
-        setIsLocating(false);
-
-        // Simulate fetching nearby mines
-        setTimeout(() => {
-            setNearbyMines(mockNearbyMines);
+        try {
+            const result = await getNearbyMines({ latitude, longitude });
+            if (result.mines.length > 0) {
+                 setNearbyMines(result.mines);
+                 toast({
+                    title: 'Nearby Mines Found',
+                    description: `Found ${result.mines.length} mines in your area.`,
+                });
+            } else {
+                 toast({
+                    title: 'No Nearby Mines Found',
+                    description: 'You can enter a mine name manually.',
+                });
+                setNearbyMines([]);
+            }
+        } catch (error) {
+             toast({
+                variant: 'destructive',
+                title: 'Could Not Fetch Nearby Mines',
+                description: 'Please enter the mine name manually.',
+            });
+             setNearbyMines([]);
+        } finally {
             setIsFetchingMines(false);
-        }, 1000);
+        }
       },
       (error) => {
         setIsLocating(false);
@@ -151,10 +165,10 @@ export function MineInformationForm({ onSubmit }: MineInformationFormProps) {
                                 size="icon"
                                 className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
                                 onClick={handleAutoLocate}
-                                disabled={isLocating}
+                                disabled={isLocating || isFetchingMines}
                                 aria-label="Auto-locate"
                             >
-                                {isLocating ? <Loader2 className="animate-spin" /> : <MapPin />}
+                                {isLocating || isFetchingMines ? <Loader2 className="animate-spin" /> : <MapPin />}
                             </Button>
                         </div>
                         <FormMessage />
@@ -178,7 +192,7 @@ export function MineInformationForm({ onSubmit }: MineInformationFormProps) {
             
             { isFetchingMines && <div className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="animate-spin h-4 w-4" /> Finding nearby mines...</div> }
 
-            { nearbyMines.length > 0 && !isFetchingMines && (
+            { (nearbyMines.length > 0 && !isFetchingMines) && (
                 <>
                     <FormField
                     control={form.control}
