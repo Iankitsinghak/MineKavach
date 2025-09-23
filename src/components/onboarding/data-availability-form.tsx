@@ -19,6 +19,8 @@ const sensors = [
   { id: 'alert_siren', label: 'Alert Sirens' },
 ] as const;
 
+const allSensorIds = sensors.map(s => s.id);
+
 const formSchema = z.object({
   sensors: z.array(z.string()).refine((value) => value.some((item) => item), {
     message: 'You have to select at least one item.',
@@ -41,6 +43,16 @@ export function DataAvailabilityForm({ onSubmit, onBack }: DataAvailabilityFormP
         },
     });
 
+    const watchedSensors = form.watch('sensors');
+
+    const handleSelectAll = (checked: boolean) => {
+        if (checked) {
+            form.setValue('sensors', allSensorIds, { shouldValidate: true });
+        } else {
+            form.setValue('sensors', [], { shouldValidate: true });
+        }
+    };
+
     const processSubmit = (data: FormValues) => {
         const selectedSensors = data.sensors.reduce((acc, sensorId) => {
             return { ...acc, [sensorId]: true };
@@ -61,8 +73,21 @@ export function DataAvailabilityForm({ onSubmit, onBack }: DataAvailabilityFormP
                         name="sensors"
                         render={() => (
                             <FormItem>
-                            <div className="mb-4">
+                            <div className="flex justify-between items-center mb-4">
                                 <FormLabel className="text-base">Available Sensors</FormLabel>
+                                <div className="flex items-center space-x-2">
+                                     <Checkbox
+                                        id="select-all"
+                                        checked={watchedSensors.length === allSensorIds.length}
+                                        onCheckedChange={handleSelectAll}
+                                    />
+                                    <label
+                                        htmlFor="select-all"
+                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                    >
+                                        Select All
+                                    </label>
+                                </div>
                             </div>
                              <div className="grid grid-cols-2 gap-4">
                                 {sensors.map((item) => (
