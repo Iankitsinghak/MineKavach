@@ -21,6 +21,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { ThemeToggle } from '../theme-toggle';
 
 export function DashboardHeader() {
   const alertCount = mockAlerts.length;
@@ -102,6 +103,8 @@ export function DashboardHeader() {
             </TooltipProvider>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <ThemeToggle />
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
