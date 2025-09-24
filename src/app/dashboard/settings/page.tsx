@@ -8,15 +8,17 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { MapPin, Loader2 } from 'lucide-react';
+import { MapPin, Loader2, PlusCircle, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getAddressFromCoordinates } from '@/ai/tools/geocoding-tool';
+import { useForm, useFieldArray, Controller } from 'react-hook-form';
 
 interface OnboardingData {
     mineName?: string;
     location?: string;
     mineType?: string;
     mineSize?: string;
+    contacts?: { name: string; email: string; phone: string }[];
 }
 
 
@@ -25,6 +27,17 @@ export default function SettingsPage() {
     const [mineType, setMineType] = useState<string | undefined>();
     const [isLocating, setIsLocating] = useState(false);
     const { toast } = useToast();
+
+    const { register, control, handleSubmit, reset } = useForm<{ contacts: { name: string; email: string; phone: string }[] }>({
+        defaultValues: {
+            contacts: [{ name: '', email: '', phone: '' }]
+        }
+    });
+
+    const { fields, append, remove } = useFieldArray({
+        control,
+        name: "contacts"
+    });
 
     useEffect(() => {
         const onboardingDataString = localStorage.getItem('onboardingData');
@@ -38,11 +51,14 @@ export default function SettingsPage() {
                     mineSize: data.mineSize || 'N/A',
                 });
                 setMineType(data.mineType);
+                if (data.contacts) {
+                    reset({ contacts: data.contacts });
+                }
             } catch (error) {
                 console.error("Failed to parse onboarding data:", error);
             }
         }
-    }, []);
+    }, [reset]);
 
     const handleAutoLocate = () => {
         if (!navigator.geolocation) {
@@ -63,8 +79,6 @@ export default function SettingsPage() {
                 
                 try {
                     const address = await getAddressFromCoordinates({ latitude, longitude });
-                    // Assuming there's a pinCode field to update
-                    // setMineInfo(prev => ({...prev, pinCode: address.pinCode}));
                     toast({
                         title: 'Location Found',
                         description: `Set to: ${coords}.`,
@@ -95,6 +109,17 @@ export default function SettingsPage() {
         const { id, value } = e.target;
         setMineInfo(prev => ({...prev, [id]: value}));
     }
+    
+    const onContactsSubmit = (data: { contacts: { name: string; email: string; phone: string }[] }) => {
+        const onboardingDataString = localStorage.getItem('onboardingData');
+        const currentData = onboardingDataString ? JSON.parse(onboardingDataString) : {};
+        const newData = { ...currentData, ...data };
+        localStorage.setItem('onboardingData', JSON.stringify(newData));
+        toast({
+            title: 'Contacts Saved',
+            description: 'Emergency contact list has been updated.',
+        });
+    };
 
 
   return (
@@ -179,6 +204,63 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
       
+        <Card>
+            <CardHeader>
+                <CardTitle>Emergency Contacts</CardTitle>
+                <CardDescription>Personnel who will receive critical alerts.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <form onSubmit={handleSubmit(onContactsSubmit)} className="space-y-6">
+                    <div>
+                        {fields.map((field, index) => (
+                             <div key={field.id} className="grid grid-cols-1 sm:grid-cols-7 gap-4 mb-4 items-start p-4 border rounded-lg relative">
+                                <div className="space-y-2 sm:col-span-2">
+                                    <Label>Name</Label>
+                                    <Input {...register(`contacts.${index}.name`)} placeholder="John Doe" />
+                                </div>
+
+                                <div className="space-y-2 sm:col-span-2">
+                                    <Label>Email</Label>
+                                    <Input {...register(`contacts.${index}.email`)} placeholder="j.doe@mine.com" />
+                                </div>
+                                
+                                <div className="space-y-2 sm:col-span-2">
+                                    <Label>Phone</Label>
+                                    <Input {...register(`contacts.${index}.phone`)} placeholder="+1234567890" />
+                                </div>
+
+                                <div className="sm:col-span-1 flex items-end h-full">
+                                     <Button
+                                        type="button"
+                                        variant="destructive"
+                                        size="icon"
+                                        onClick={() => remove(index)}
+                                        className="mt-auto"
+                                        disabled={fields.length <= 1}
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                        <span className="sr-only">Remove Contact</span>
+                                    </Button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="flex justify-between">
+                         <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => append({ name: '', email: '', phone: '' })}
+                        >
+                            <PlusCircle className="mr-2" />
+                            Add Contact
+                        </Button>
+                        <Button type="submit">Save Contacts</Button>
+                    </div>
+                </form>
+            </CardContent>
+        </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>Notification Preferences</CardTitle>
@@ -242,7 +324,7 @@ export default function SettingsPage() {
       </Card>
 
        <div className="flex justify-end">
-            <Button>Save Changes</Button>
+            <Button>Save All Changes</Button>
         </div>
     </div>
   );
