@@ -8,23 +8,63 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { ListFilter } from 'lucide-react';
-import { mockAlerts } from '@/lib/data';
+import { ListFilter, Sparkles, Loader2 } from 'lucide-react';
+import { mockAlerts, mockSensorData } from '@/lib/data';
 import type { Alert } from '@/lib/types';
+import { analyzeCurrentRiskFromSensors, AnalyzedRisk } from '@/ai/flows/analyze-current-risk-from-sensors';
+import { useToast } from '@/hooks/use-toast';
+
 
 export default function AlertsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [severityFilter, setSeverityFilter] = useState('all');
+  const [alerts, setAlerts] = useState<Alert[]>(mockAlerts);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const { toast } = useToast();
+
+  const handleGenerateRisks = async () => {
+    setIsGenerating(true);
+    try {
+      const result = await analyzeCurrentRiskFromSensors({
+        sensorData: JSON.stringify(mockSensorData.slice(-10)), // Last 10 readings
+        environmentalFactors: 'Recent heavy rainfall over the past 48 hours, with temperatures fluctuating around freezing point at night.',
+      });
+
+      const newAlerts: Alert[] = result.risks.map((risk: AnalyzedRisk, index: number) => ({
+        id: `AI-ALERT-${Date.now()}-${index}`,
+        timestamp: new Date().toISOString().slice(0, 16).replace('T', ' '),
+        location: risk.location,
+        severity: risk.severity as 'Low' | 'Medium' | 'High',
+        description: risk.description,
+      }));
+
+      setAlerts(newAlerts);
+      toast({
+        title: 'Analysis Complete',
+        description: `Generated ${newAlerts.length} new risk alerts.`,
+      });
+
+    } catch (error) {
+      console.error("Failed to generate risk analysis:", error);
+      toast({
+        variant: 'destructive',
+        title: 'Analysis Failed',
+        description: 'Could not generate risk analysis. Please try again.',
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const filteredAlerts = useMemo(() => {
-    return mockAlerts.filter((alert) => {
+    return alerts.filter((alert) => {
       const matchesSeverity = severityFilter === 'all' || alert.severity.toLowerCase() === severityFilter;
       const matchesSearch =
         alert.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
         alert.description.toLowerCase().includes(searchTerm.toLowerCase());
       return matchesSeverity && matchesSearch;
     });
-  }, [searchTerm, severityFilter]);
+  }, [alerts, searchTerm, severityFilter]);
 
   const severityMap: { [key: string]: string } = {
     Low: 'default',
@@ -37,7 +77,7 @@ export default function AlertsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Alerts Dashboard</CardTitle>
-          <CardDescription>View, filter, and manage all system alerts.</CardDescription>
+          <CardDescription>View, filter, and generate real-time risk analysis.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col sm:flex-row gap-4">
@@ -58,9 +98,9 @@ export default function AlertsPage() {
                 <SelectItem value="low">Low</SelectItem>
               </SelectContent>
             </Select>
-            <Button className="w-full sm:w-auto" disabled>
-              <ListFilter className="mr-2" />
-              Apply Filter
+            <Button className="w-full sm:w-auto" onClick={handleGenerateRisks} disabled={isGenerating}>
+              {isGenerating ? <Loader2 className="mr-2 animate-spin" /> : <Sparkles className="mr-2" />}
+              Generate Risk Analysis
             </Button>
           </div>
         </CardContent>
@@ -94,7 +134,7 @@ export default function AlertsPage() {
               ) : (
                 <TableRow>
                   <TableCell colSpan={4} className="h-24 text-center">
-                    No alerts found.
+                    No alerts found. Try generating a new risk analysis.
                   </TableCell>
                 </TableRow>
               )}
