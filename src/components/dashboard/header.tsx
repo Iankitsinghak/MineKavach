@@ -1,4 +1,6 @@
 
+'use client';
+import { useState } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,9 +12,10 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Search, Bell, AlertCircle, Clock, PanelLeft } from 'lucide-react';
+import { Search, Bell, AlertCircle, Clock, CheckCircle } from 'lucide-react';
 import { SidebarTrigger } from '../ui/sidebar';
 import { mockAlerts } from '@/lib/data';
+import type { Alert } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import {
@@ -24,7 +27,15 @@ import {
 import { ThemeToggle } from '../theme-toggle';
 
 export function DashboardHeader() {
-  const alertCount = mockAlerts.length;
+  const [alerts, setAlerts] = useState<Alert[]>(mockAlerts);
+
+  const handleMarkAsRead = (alertId: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setAlerts(currentAlerts => currentAlerts.filter(alert => alert.id !== alertId));
+  };
+  
+  const alertCount = alerts.length;
 
   const severityIconMap: { [key: string]: React.ElementType } = {
     High: () => <AlertCircle className="size-4 text-destructive" />,
@@ -67,26 +78,28 @@ export function DashboardHeader() {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-80 md:w-96">
             <DropdownMenuLabel className="flex items-center justify-between">
-                <span>Recent Alerts</span>
-                <Link href="/dashboard/alerts" className="text-xs font-normal text-primary hover:underline">
-                    View all
-                </Link>
+                <span>Recent Alerts ({alertCount})</span>
+                 {alertCount > 0 && (
+                    <Link href="/dashboard/alerts" className="text-xs font-normal text-primary hover:underline">
+                        View all
+                    </Link>
+                 )}
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <TooltipProvider>
-                {mockAlerts.slice(0,4).map((alert) => {
+                {alertCount > 0 ? alerts.slice(0,4).map((alert) => {
                     const Icon = severityIconMap[alert.severity];
                     return (
-                        <DropdownMenuItem key={alert.id} asChild>
+                        <DropdownMenuItem key={alert.id} asChild className="relative group/item">
                              <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <Link href="/dashboard/alerts" className="flex items-start gap-3 p-2 hover:bg-muted/50 rounded-md">
+                                    <Link href="/dashboard/alerts" className="flex items-start gap-3 p-2 hover:bg-muted/50 rounded-md w-full">
                                         <div className="mt-1">
                                              <Icon />
                                         </div>
                                         <div className="flex-1 space-y-1.5">
                                             <p className="text-sm font-medium leading-none">{alert.location}</p>
-                                            <p className="text-sm text-muted-foreground">{alert.description}</p>
+                                            <p className="text-sm text-muted-foreground text-wrap">{alert.description}</p>
                                         </div>
                                     </Link>
                                  </TooltipTrigger>
@@ -96,10 +109,20 @@ export function DashboardHeader() {
                                         <span>{alert.timestamp}</span>
                                     </div>
                                 </TooltipContent>
+                                <button onClick={(e) => handleMarkAsRead(alert.id, e)} className="absolute right-2 top-2 p-1 rounded-full hover:bg-secondary opacity-0 group-hover/item:opacity-100 transition-opacity">
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <CheckCircle className="size-4 text-green-600"/>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="top">Mark as read</TooltipContent>
+                                    </Tooltip>
+                                </button>
                             </Tooltip>
                         </DropdownMenuItem>
                     );
-                })}
+                }) : (
+                     <div className="text-center text-sm text-muted-foreground p-4">No new alerts</div>
+                )}
             </TooltipProvider>
         </DropdownMenuContent>
       </DropdownMenu>
