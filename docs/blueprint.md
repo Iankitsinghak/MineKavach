@@ -1,4 +1,4 @@
-# **App Name**: Rockfall Sentinel
+# **App Name**: MineKavach
 
 ## Core Features:
 
