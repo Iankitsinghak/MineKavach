@@ -3,7 +3,6 @@
 **Rockfall Sentinel: AI-Powered Mine Safety Monitoring & Alert System**
 
 [![Deploy Status](https://img.shields.io/badge/deploy-live-success)](https://mine-kavach.vercel.app)
-[![TypeScript](https://img.shields. io/badge/TypeScript-91. 8%25-blue)](https://www.typescriptlang.org/)
 [![Python](https://img.shields.io/badge/Python-6.7%25-yellow)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
